@@ -4,22 +4,21 @@ import {
   TextField,
   Button,
   Box,
-  Typography,
+  IconButton,
   CircularProgress,
-  Alert,
 } from '@mui/material'
-import SendIcon from '@mui/icons-material/Send'
-import InfoIcon from '@mui/icons-material/Info'
+import {
+  AttachFile as AttachFileIcon,
+  Upload as UploadIcon,
+  Send as SendIcon,
+} from '@mui/icons-material'
 import { analyzeText } from '../api'
 
-function PromptForm({ onResult, onError, onOffline, loading, setLoading }) {
+function PromptForm({ onResult, onError, loading, setLoading, inline = false }) {
   const [text, setText] = useState('')
-  const [charCount, setCharCount] = useState(0)
 
   const handleTextChange = (e) => {
-    const value = e.target.value
-    setText(value)
-    setCharCount(value.length)
+    setText(e.target.value)
   }
 
   const handleSubmit = async (e) => {
@@ -37,8 +36,7 @@ function PromptForm({ onResult, onError, onOffline, loading, setLoading }) {
 
       if (result.success) {
         onResult(result.data)
-      } else if (result.offline) {
-        onOffline(result.data)
+        setText('') // Clear after successful analysis
       } else {
         onError(result.error || 'Failed to analyze text')
       }
@@ -49,50 +47,79 @@ function PromptForm({ onResult, onError, onOffline, loading, setLoading }) {
     }
   }
 
-  const handleUseSample = () => {
-    setText(
-      'My name is John Doe and my email is john.doe@company.com. You can call me at 555-0123. I live at 123 Main St, New York, NY 10001.'
+  if (inline) {
+    return (
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          p: 1,
+        }}
+      >
+        <IconButton size="small" disabled={loading}>
+          <AttachFileIcon />
+        </IconButton>
+        <IconButton size="small" disabled={loading}>
+          <UploadIcon />
+        </IconButton>
+        
+        <TextField
+          fullWidth
+          multiline
+          maxRows={3}
+          placeholder="Ask anything OmniAI..."
+          value={text}
+          onChange={handleTextChange}
+          disabled={loading}
+          variant="standard"
+          InputProps={{
+            disableUnderline: true,
+          }}
+          sx={{
+            '& .MuiInputBase-input': {
+              fontSize: '0.95rem',
+            },
+          }}
+        />
+
+        <IconButton
+          type="submit"
+          disabled={loading || !text.trim()}
+          sx={{
+            bgcolor: loading || !text.trim() ? '#E0E0E0' : '#FF8C42',
+            color: 'white',
+            '&:hover': {
+              bgcolor: loading || !text.trim() ? '#E0E0E0' : '#E67A35',
+            },
+            '&.Mui-disabled': {
+              bgcolor: '#E0E0E0',
+              color: 'white',
+            },
+          }}
+        >
+          {loading ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
+        </IconButton>
+      </Box>
     )
-    setCharCount(135)
   }
 
   return (
     <Paper elevation={2} sx={{ p: 3 }}>
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
-        🔍 Analyze Your Prompt
-      </Typography>
-
-      <Alert severity="info" icon={<InfoIcon />} sx={{ mb: 3 }}>
-        Enter any text below. We'll detect PII (names, emails, phone numbers, etc.), redact it, 
-        and send ONLY the redacted version to Gemini AI for processing.
-      </Alert>
-
       <form onSubmit={handleSubmit}>
         <TextField
           fullWidth
           multiline
           rows={6}
           variant="outlined"
-          placeholder="Enter your prompt here... (e.g., 'My name is Sarah and my email is sarah@example.com')"
+          placeholder="Enter your prompt here..."
           value={text}
           onChange={handleTextChange}
           disabled={loading}
           sx={{ mb: 2 }}
         />
-
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="caption" color="text.secondary">
-            {charCount} characters
-          </Typography>
-          <Button
-            variant="text"
-            size="small"
-            onClick={handleUseSample}
-            disabled={loading}
-          >
-            Use Sample Text
-          </Button>
-        </Box>
 
         <Button
           type="submit"
@@ -101,7 +128,11 @@ function PromptForm({ onResult, onError, onOffline, loading, setLoading }) {
           fullWidth
           disabled={loading || !text.trim()}
           startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
-          sx={{ py: 1.5 }}
+          sx={{
+            py: 1.5,
+            bgcolor: '#FF8C42',
+            '&:hover': { bgcolor: '#E67A35' },
+          }}
         >
           {loading ? 'Analyzing...' : 'Analyze Prompt'}
         </Button>
