@@ -22,13 +22,25 @@ const apiClient = axios.create({
 })
 
 /**
- * Analyze text for PII and get Gemini response
+ * Analyze text for PII and get LLM response
  * @param {string} text - Text to analyze
+ * @param {string} llmProvider - LLM provider (gemini or openai)
+ * @param {string} model - Model to use
  * @returns {Promise<object>} Analysis result
  */
-export const analyzeText = async (text) => {
+export const analyzeText = async (text, llmProvider = 'gemini', model = null) => {
   try {
-    const response = await apiClient.post('/v1/analyze', { text })
+    const requestBody = { 
+      text,
+      llm_provider: llmProvider
+    }
+    
+    // Add model if specified
+    if (model) {
+      requestBody.model = model
+    }
+    
+    const response = await apiClient.post('/v1/analyze', requestBody)
     return {
       success: true,
       data: response.data,

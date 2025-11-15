@@ -1,8 +1,8 @@
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
-python-dotenv==1.0.0
-pydantic==2.5.3
-aiohttp==3.9.1
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+python-dotenv==1.0.1
+pydantic==2.9.2
+aiohttp==3.10.10
 
 # Presidio for PII detection and anonymization
 presidio-analyzer==2.2.351
@@ -17,6 +17,9 @@ https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.7.1
 # MongoDB async driver (OPTIONAL - not used in Vercel deployment)
 # motor==3.3.2
 # pymongo==4.6.1
+
+# OpenAI GPT API
+openai==1.12.0
 
 # Additional dependencies
 python-multipart==0.0.6
