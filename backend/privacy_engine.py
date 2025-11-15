@@ -287,13 +287,16 @@ def detect_contextual_names(text: str, existing_entities: List[Dict]) -> List[Di
     
     # Context patterns for names - NOW CASE-INSENSITIVE with (?i) flag
     # Will capture 1-2 words after context phrases regardless of capitalization
+    # Handles various punctuation and spacing issues
     name_patterns = [
-        (r"(?i)(?:my name is|my name's)\s+(\w+(?:\s+\w+)?)\b", 0.95),
-        (r"(?i)(?:I am|I'm)\s+(\w+(?:\s+\w+)?)\b", 0.85),
-        (r"(?i)(?:call me|called)\s+(\w+(?:\s+\w+)?)\b", 0.9),
-        (r"(?i)(?:this is|meet)\s+(\w+(?:\s+\w+)?)\b", 0.85),
-        (r"(?i)(?:named)\s+(\w+(?:\s+\w+)?)\b", 0.85),
-        (r"(?i)(?:hi|hello|hey),?\s+(?:i'm|i am|this is)\s+(\w+(?:\s+\w+)?)\b", 0.9),
+        (r"(?i)(?:my name is|my name's)\s+(\w+(?:\s+\w+)?)", 0.95),
+        (r"(?i)(?:I am|I'm)\s+(\w+(?:\s+\w+)?)", 0.85),
+        (r"(?i)(?:call me|called)\s+(\w+(?:\s+\w+)?)", 0.9),
+        (r"(?i)(?:this is|meet)\s+(\w+(?:\s+\w+)?)", 0.85),
+        (r"(?i)(?:named)\s+(\w+(?:\s+\w+)?)", 0.85),
+        (r"(?i)(?:hi|hello|hey),?\s+(?:i'm|i am|this is)\s+(\w+(?:\s+\w+)?)", 0.9),
+        # Handle "from" location patterns
+        (r"(?i)\b(\w+)\s+from\s+(\w+)", 0.90),  # "Tejas from Hyderabad"
     ]
     
     for pattern, score in name_patterns:
