@@ -27,7 +27,7 @@ import {
 import EntityHighlighter from './EntityHighlighter'
 import PrivacyScoreBar from './PrivacyScoreBar'
 
-function ResultPanel() {
+function ResultPanel({ initialPrompt }) {
   const [apiKey, setApiKey] = useState(localStorage.getItem('geminiApiKey') || '')
   const [tempApiKey, setTempApiKey] = useState('')
   const [showApiKeyInput, setShowApiKeyInput] = useState(!localStorage.getItem('geminiApiKey'))
@@ -40,10 +40,22 @@ function ResultPanel() {
   const [privacyScore, setPrivacyScore] = useState(0)
   const [detectedEntitiesWithScores, setDetectedEntitiesWithScores] = useState([])
   const chatEndRef = useRef(null)
+  const initialPromptSentRef = useRef(false)
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [chatMessages])
+
+  // Auto-send initial prompt from home screen
+  useEffect(() => {
+    if (initialPrompt && !initialPromptSentRef.current && apiKey) {
+      initialPromptSentRef.current = true
+      // Send the message directly without setting userMessage state
+      handleSendMessage(initialPrompt)
+      // Clear the input field after sending
+      setUserMessage('')
+    }
+  }, [initialPrompt, apiKey])
 
   const handleSaveApiKey = () => {
     if (tempApiKey.trim()) {
@@ -60,11 +72,12 @@ function ResultPanel() {
     setShowApiKeyInput(true)
   }
 
-  const handleSendMessage = async () => {
-    if (!userMessage.trim() || !apiKey || chatLoading) return
+  const handleSendMessage = async (messageToSend = null) => {
+    const message = messageToSend || userMessage
+    if (!message.trim() || !apiKey || chatLoading) return
 
     // First, redact PII from the user's message before sending
-    let cleanedMessage = userMessage
+    let cleanedMessage = message
     let detectedEntities = []
     
     try {
@@ -72,12 +85,12 @@ function ResultPanel() {
       const cleanResponse = await fetch(`${apiUrl}/v1/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: userMessage }),
+        body: JSON.stringify({ text: message }),
       })
 
       if (cleanResponse.ok) {
         const cleanData = await cleanResponse.json()
-        cleanedMessage = cleanData.redacted_text || userMessage
+        cleanedMessage = cleanData.redacted_text || message
         detectedEntities = cleanData.entities || []
         
         // Update privacy score and total entities
@@ -99,7 +112,7 @@ function ResultPanel() {
         }
         
         // Log for debugging
-        console.log('Original message:', userMessage)
+        console.log('Original message:', message)
         console.log('Cleaned message:', cleanedMessage)
         console.log('Detected entities:', detectedEntities)
       } else {
@@ -112,7 +125,7 @@ function ResultPanel() {
     // Show user their original message
     const newUserMessage = {
       role: 'user',
-      content: userMessage,
+      content: message,
       timestamp: new Date().toISOString(),
     }
 

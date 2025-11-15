@@ -60,8 +60,8 @@ class AnalyzeResponse(BaseModel):
     redacted_text: str = Field(..., description="Text with PII redacted")
     entities: List[EntityDetection] = Field(..., description="List of detected entities")
     privacy_score: int = Field(..., description="Privacy risk score (0-100)", ge=0, le=100)
-    llm_response: str = Field(..., description="Response from LLM (Gemini or OpenAI)")
-    llm_provider: str = Field(..., description="LLM provider used")
+    llm_response: Optional[str] = Field(None, description="Response from LLM (Gemini or OpenAI)")
+    llm_provider: Optional[str] = Field(None, description="LLM provider used")
     # Keep gemini_response for backward compatibility
     gemini_response: Optional[str] = Field(None, description="Deprecated: use llm_response")
     

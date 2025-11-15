@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 import uvicorn
 
 from privacy_engine import analyze_text, calculate_privacy_score
-from gemini_client import query_gemini
+# from gemini_client import query_gemini  # LLM integration now done on frontend
 # from db import save_audit_log  # OPTIONAL - Disabled for Vercel deployment (uses localStorage)
 from models import AnalyzeRequest, AnalyzeResponse, HealthResponse
 
@@ -88,16 +88,15 @@ async def analyze_prompt(request: AnalyzeRequest):
         # Step 4: Get redacted text
         redacted_text = analysis_result["redacted_text"]
         
-        # Step 5: Query Gemini with ONLY redacted text
-        gemini_response = await query_gemini(redacted_text)
-        
-        # Step 6: Prepare response
+        # Step 5: Prepare response (LLM integration done on frontend)
         response = AnalyzeResponse(
             original_text=request.text,
             redacted_text=redacted_text,
             entities=analysis_result["entities"],
             privacy_score=privacy_score,
-            gemini_response=gemini_response
+            llm_response=None,
+            llm_provider=None,
+            gemini_response=None
         )
         
         # Step 7: Save audit log (DISABLED for Vercel - using localStorage)

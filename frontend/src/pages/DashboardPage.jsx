@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Box,
   Typography,
@@ -18,6 +18,8 @@ import ResultPanel from '../components/ResultPanel'
 
 function DashboardPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const initialPrompt = location.state?.initialPrompt || null
 
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated')
@@ -115,7 +117,7 @@ function DashboardPage() {
         </Box>
 
         {/* AI Chat Panel - Always visible */}
-        <ResultPanel />
+        <ResultPanel initialPrompt={initialPrompt} />
       </Container>
     </Box>
   )

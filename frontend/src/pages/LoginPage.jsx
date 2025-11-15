@@ -40,8 +40,7 @@ function LoginPage() {
     e.preventDefault()
     if (quickPrompt.trim()) {
       localStorage.setItem('isAuthenticated', 'true')
-      localStorage.setItem('quickPrompt', quickPrompt)
-      navigate('/dashboard')
+      navigate('/dashboard', { state: { initialPrompt: quickPrompt } })
     }
   }
 
