@@ -3,16 +3,33 @@ Pydantic Models for Request/Response Validation
 """
 from pydantic import BaseModel, Field
 from typing import List, Optional
+from enum import Enum
+
+
+class LLMProvider(str, Enum):
+    """Supported LLM providers"""
+    GEMINI = "gemini"
+    OPENAI = "openai"
 
 
 class AnalyzeRequest(BaseModel):
     """Request model for /v1/analyze endpoint"""
     text: str = Field(..., description="Text to analyze for PII", min_length=1)
+    llm_provider: Optional[LLMProvider] = Field(
+        default=LLMProvider.GEMINI,
+        description="LLM provider to use (gemini or openai)"
+    )
+    model: Optional[str] = Field(
+        default=None,
+        description="Specific model to use (e.g., gpt-4, gpt-3.5-turbo, gemini-1.5-flash)"
+    )
     
     class Config:
         json_schema_extra = {
             "example": {
-                "text": "My name is John Doe and my email is john@example.com"
+                "text": "My name is John Doe and my email is john@example.com",
+                "llm_provider": "openai",
+                "model": "gpt-3.5-turbo"
             }
         }
 
@@ -43,7 +60,10 @@ class AnalyzeResponse(BaseModel):
     redacted_text: str = Field(..., description="Text with PII redacted")
     entities: List[EntityDetection] = Field(..., description="List of detected entities")
     privacy_score: int = Field(..., description="Privacy risk score (0-100)", ge=0, le=100)
-    gemini_response: str = Field(..., description="Response from Gemini AI")
+    llm_response: str = Field(..., description="Response from LLM (Gemini or OpenAI)")
+    llm_provider: str = Field(..., description="LLM provider used")
+    # Keep gemini_response for backward compatibility
+    gemini_response: Optional[str] = Field(None, description="Deprecated: use llm_response")
     
     class Config:
         json_schema_extra = {

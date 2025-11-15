@@ -12,8 +12,9 @@ import uvicorn
 
 from privacy_engine import analyze_text, calculate_privacy_score
 from gemini_client import query_gemini
+from openai_client import query_openai
 from db import save_audit_log
-from models import AnalyzeRequest, AnalyzeResponse, HealthResponse
+from models import AnalyzeRequest, AnalyzeResponse, HealthResponse, LLMProvider
 
 load_dotenv()
 
@@ -65,13 +66,13 @@ async def health_check():
 @app.post("/v1/analyze", response_model=AnalyzeResponse)
 async def analyze_prompt(request: AnalyzeRequest):
     """
-    Analyze text for PII, redact sensitive data, and forward to Gemini
+    Analyze text for PII, redact sensitive data, and forward to selected LLM
     
     Process:
     1. Analyze text with Presidio
     2. Calculate privacy score
     3. Redact PII
-    4. Send ONLY redacted text to Gemini
+    4. Send ONLY redacted text to selected LLM (Gemini or OpenAI)
     5. Log to MongoDB (without raw PII)
     6. Return results
     """
@@ -88,8 +89,15 @@ async def analyze_prompt(request: AnalyzeRequest):
         # Step 4: Get redacted text
         redacted_text = analysis_result["redacted_text"]
         
-        # Step 5: Query Gemini with ONLY redacted text
-        gemini_response = await query_gemini(redacted_text)
+        # Step 5: Query selected LLM with ONLY redacted text
+        llm_provider = request.llm_provider or LLMProvider.GEMINI
+        
+        if llm_provider == LLMProvider.OPENAI:
+            llm_response = await query_openai(redacted_text, model=request.model)
+            provider_name = "openai"
+        else:  # Default to Gemini
+            llm_response = await query_gemini(redacted_text)
+            provider_name = "gemini"
         
         # Step 6: Prepare response
         response = AnalyzeResponse(
@@ -97,7 +105,9 @@ async def analyze_prompt(request: AnalyzeRequest):
             redacted_text=redacted_text,
             entities=analysis_result["entities"],
             privacy_score=privacy_score,
-            gemini_response=gemini_response
+            llm_response=llm_response,
+            llm_provider=provider_name,
+            gemini_response=llm_response  # Backward compatibility
         )
         
         # Step 7: Save audit log (without raw PII)
@@ -106,8 +116,9 @@ async def analyze_prompt(request: AnalyzeRequest):
             "entity_types": [e["entity_type"] for e in analysis_result["entities"]],
             "entity_count": len(analysis_result["entities"]),
             "input_length": len(request.text),
-            "output_length": len(gemini_response),
-            "redacted_text_sample": redacted_text[:100]  # Only first 100 chars
+            "output_length": len(llm_response),
+            "redacted_text_sample": redacted_text[:100],  # Only first 100 chars
+            "llm_provider": provider_name
         })
         
         return response
@@ -140,5 +151,5 @@ if __name__ == "__main__":
         "main:app",
         host="0.0.0.0",
         port=port,
-        reload=True
+        reload=False  # Disabled reload for compatibility
     )

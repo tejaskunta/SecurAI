@@ -13,9 +13,25 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import SmartToyIcon from '@mui/icons-material/SmartToy'
 import EntityHighlighter from './EntityHighlighter'
 import PrivacyScoreBar from './PrivacyScoreBar'
+import ChatInterface from './ChatInterface'
 
 function ResultPanel({ result, offlineMode }) {
-  const { original_text, redacted_text, entities, privacy_score, gemini_response } = result
+  const { 
+    original_text, 
+    redacted_text, 
+    entities, 
+    privacy_score, 
+    llm_response,
+    gemini_response, 
+    llm_provider = 'gemini'
+  } = result
+
+  // Use llm_response if available, fallback to gemini_response for backward compatibility
+  const aiResponse = llm_response || gemini_response
+
+  // Determine the AI provider name for display
+  const providerName = llm_provider === 'openai' ? 'OpenAI GPT' : 'Google Gemini'
+  const providerColor = llm_provider === 'openai' ? 'success' : 'secondary'
 
   return (
     <Box>
@@ -94,13 +110,18 @@ function ResultPanel({ result, offlineMode }) {
         </Grid>
       </Grid>
 
-      {/* Gemini Response */}
+      {/* AI Response */}
       <Paper elevation={2} sx={{ p: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-          <SmartToyIcon color="secondary" />
+          <SmartToyIcon color={providerColor} />
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Gemini AI Response
+            {providerName} Response
           </Typography>
+          <Chip 
+            label={llm_provider === 'openai' ? 'OpenAI' : 'Gemini'} 
+            size="small" 
+            color={providerColor} 
+          />
           {offlineMode && (
             <Chip label="Sample Data" size="small" color="warning" />
           )}
@@ -110,15 +131,22 @@ function ResultPanel({ result, offlineMode }) {
           variant="body1"
           sx={{
             p: 2,
-            bgcolor: 'secondary.50',
+            bgcolor: llm_provider === 'openai' ? 'success.50' : 'secondary.50',
             borderRadius: 1,
             whiteSpace: 'pre-wrap',
             lineHeight: 1.7,
           }}
         >
-          {gemini_response}
+          {aiResponse}
         </Typography>
       </Paper>
+
+      {/* Chat Interface for Follow-up Questions */}
+      <ChatInterface 
+        initialResult={result} 
+        llmProvider={llm_provider}
+        model={result.model}
+      />
     </Box>
   )
 }
