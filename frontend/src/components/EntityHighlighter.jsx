@@ -34,11 +34,12 @@ function EntityHighlighter({ text, entities }) {
       <Box
         sx={{
           p: 2,
-          bgcolor: 'grey.50',
+          bgcolor: 'rgba(10, 10, 15, 0.6)',
           borderRadius: 1,
           fontFamily: 'monospace',
           whiteSpace: 'pre-wrap',
           wordBreak: 'break-word',
+          color: '#d1d5db',
         }}
       >
         {text}
@@ -110,17 +111,18 @@ function EntityHighlighter({ text, entities }) {
     <Box
       sx={{
         p: 2,
-        bgcolor: 'grey.50',
+        bgcolor: 'rgba(10, 10, 15, 0.6)',
         borderRadius: 1,
         fontFamily: 'monospace',
         whiteSpace: 'pre-wrap',
         wordBreak: 'break-word',
         lineHeight: 1.8,
+        color: '#d1d5db',
       }}
     >
       {segments.map((segment) => {
         if (segment.type === 'text') {
-          return <span key={segment.key}>{segment.content}</span>
+          return <span key={segment.key} style={{ color: '#d1d5db' }}>{segment.content}</span>
         }
 
         // Highlighted entity

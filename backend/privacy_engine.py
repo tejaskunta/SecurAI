@@ -274,6 +274,7 @@ def detect_contextual_names(text: str, existing_entities: List[Dict]) -> List[Di
     Detect names based on context clues that Presidio/spaCy might miss
     Looks for patterns like "My name is X", "I am X", "called X", etc.
     Especially useful for Indian names that may not be in NLP models
+    NOW CASE-INSENSITIVE: Will detect "bob", "Bob", "BOB" equally
     
     Args:
         text: Original text
@@ -284,13 +285,15 @@ def detect_contextual_names(text: str, existing_entities: List[Dict]) -> List[Di
     """
     additional_entities = []
     
-    # Context patterns for names - capture only 1-2 capitalized words after context
+    # Context patterns for names - NOW CASE-INSENSITIVE with (?i) flag
+    # Will capture 1-2 words after context phrases regardless of capitalization
     name_patterns = [
-        (r"(?:my name is|my name's|My name is|My name's)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\b", 0.95),
-        (r"(?:I am|I'm)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\b", 0.85),
-        (r"(?:call me|called)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\b", 0.9),
-        (r"(?:this is|meet|This is)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\b", 0.85),
-        (r"(?:named)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\b", 0.85),
+        (r"(?i)(?:my name is|my name's)\s+(\w+(?:\s+\w+)?)\b", 0.95),
+        (r"(?i)(?:I am|I'm)\s+(\w+(?:\s+\w+)?)\b", 0.85),
+        (r"(?i)(?:call me|called)\s+(\w+(?:\s+\w+)?)\b", 0.9),
+        (r"(?i)(?:this is|meet)\s+(\w+(?:\s+\w+)?)\b", 0.85),
+        (r"(?i)(?:named)\s+(\w+(?:\s+\w+)?)\b", 0.85),
+        (r"(?i)(?:hi|hello|hey),?\s+(?:i'm|i am|this is)\s+(\w+(?:\s+\w+)?)\b", 0.9),
     ]
     
     for pattern, score in name_patterns:
@@ -300,7 +303,9 @@ def detect_contextual_names(text: str, existing_entities: List[Dict]) -> List[Di
             end = match.end(1)
             
             # Validate the name doesn't contain common words that aren't names
-            stop_words = ['and', 'the', 'is', 'at', 'to', 'for', 'of', 'in', 'on', 'my', 'email', 'with']
+            stop_words = ['and', 'the', 'is', 'at', 'to', 'for', 'of', 'in', 'on', 'my', 'email', 'with', 
+                         'here', 'there', 'what', 'how', 'when', 'where', 'why', 'who', 'can', 'will',
+                         'would', 'could', 'should', 'may', 'might', 'must', 'shall', 'be', 'am', 'are']
             name_lower = name.lower()
             
             # Skip if name is a stop word or contains email-related text

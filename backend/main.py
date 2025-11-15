@@ -12,7 +12,7 @@ import uvicorn
 
 from privacy_engine import analyze_text, calculate_privacy_score
 from gemini_client import query_gemini
-from db import save_audit_log
+# from db import save_audit_log  # OPTIONAL - Disabled for Vercel deployment (uses localStorage)
 from models import AnalyzeRequest, AnalyzeResponse, HealthResponse
 
 load_dotenv()
@@ -100,21 +100,35 @@ async def analyze_prompt(request: AnalyzeRequest):
             gemini_response=gemini_response
         )
         
-        # Step 7: Save audit log (without raw PII)
-        await save_audit_log({
-            "privacy_score": privacy_score,
-            "entity_types": [e["entity_type"] for e in analysis_result["entities"]],
-            "entity_count": len(analysis_result["entities"]),
-            "input_length": len(request.text),
-            "output_length": len(gemini_response),
-            "redacted_text_sample": redacted_text[:100]  # Only first 100 chars
-        })
+        # Step 7: Save audit log (DISABLED for Vercel - using localStorage)
+        # await save_audit_log({
+        #     "original_text": request.text,
+        #     "redacted_text": redacted_text,
+        #     "entities": analysis_result["entities"],
+        #     "privacy_score": privacy_score,
+        #     "entity_types": [e["entity_type"] for e in analysis_result["entities"]],
+        #     "entity_count": len(analysis_result["entities"]),
+        #     "gemini_response": gemini_response
+        # })
         
         return response
         
     except Exception as e:
         print(f"Error in analyze_prompt: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+
+
+# DISABLED: MongoDB history endpoint (using localStorage)
+# @app.get("/history")
+# async def get_history():
+#     """Return recent analysis history"""
+#     from db import get_recent_logs
+#     try:
+#         logs = await get_recent_logs(limit=50)
+#         return {"history": logs, "count": len(logs)}
+#     except Exception as e:
+#         print(f"Error fetching history: {str(e)}")
+#         raise HTTPException(status_code=500, detail="Failed to fetch history")
 
 
 @app.get("/v1/sample")

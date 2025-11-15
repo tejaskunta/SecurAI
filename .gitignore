@@ -68,3 +68,4 @@ htmlcov/
 
 # spaCy models (too large for git)
 backend/en_core_web_lg/
+.vercel
