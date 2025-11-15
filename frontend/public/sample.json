@@ -1,0 +1,36 @@
+{
+  "original_text": "Hi, my name is Sarah Johnson and I work at TechCorp. You can reach me at sarah.j@techcorp.com or call me at 555-123-4567. I live in San Francisco, CA.",
+  "redacted_text": "Hi, my name is [PERSON] and I work at [ORGANIZATION]. You can reach me at [EMAIL] or call me at [PHONE]. I live in [LOCATION].",
+  "entities": [
+    {
+      "entity_type": "PERSON",
+      "start": 15,
+      "end": 28,
+      "score": 0.95,
+      "text": "Sarah Johnson"
+    },
+    {
+      "entity_type": "EMAIL_ADDRESS",
+      "start": 70,
+      "end": 91,
+      "score": 1.0,
+      "text": "sarah.j@techcorp.com"
+    },
+    {
+      "entity_type": "PHONE_NUMBER",
+      "start": 108,
+      "end": 120,
+      "score": 0.9,
+      "text": "555-123-4567"
+    },
+    {
+      "entity_type": "LOCATION",
+      "start": 133,
+      "end": 151,
+      "score": 0.85,
+      "text": "San Francisco, CA"
+    }
+  ],
+  "privacy_score": 68,
+  "gemini_response": "⚠️ OFFLINE MODE: Backend unavailable. This is sample data for demonstration purposes."
+}
