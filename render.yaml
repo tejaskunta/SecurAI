@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: securai-backend
+    env: python
+    region: oregon
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt && python -m spacy download en_core_web_lg
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: ALLOW_ORIGINS
+        value: https://securai.netlify.app,https://your-netlify-app.netlify.app,http://localhost:5173
+      - key: GEMINI_API_KEY
+        sync: false
+    healthCheckPath: /health
