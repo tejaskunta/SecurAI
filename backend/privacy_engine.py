@@ -29,7 +29,43 @@ phone_recognizer = PatternRecognizer(
     ],
 )
 
-# Custom recognizer for US addresses (street number + street + city + state + zip)
+# Custom recognizer for occupations/job titles - CASE-INSENSITIVE
+occupation_recognizer = PatternRecognizer(
+    supported_entity="OCCUPATION",
+    name="occupation_recognizer",
+    patterns=[
+        Pattern(
+            name="occupation_context",
+            regex=r"(?i)\b(?:works?\s+as|job\s+is|occupation\s+is|profession\s+is|employed\s+as|position\s+is|role\s+is|title\s+is|i\s+am\s+a|i'm\s+a)\s+(?:a\s+|an\s+)?([a-z][a-z\s]{2,30}?)(?=\s+at|\s+in|\s+for|\.|,|$)",
+            score=0.85
+        ),
+        Pattern(
+            name="occupation_title",
+            regex=r"(?i)\b(software\s+engineer|data\s+scientist|product\s+manager|designer|developer|teacher|doctor|nurse|lawyer|accountant|engineer|manager|consultant|analyst|architect|ceo|cto|cfo|director|professor|researcher|student)\b",
+            score=0.80
+        ),
+    ],
+)
+
+# Custom recognizer for organizations/companies - CASE-INSENSITIVE
+organization_recognizer = PatternRecognizer(
+    supported_entity="ORGANIZATION",
+    name="organization_recognizer",
+    patterns=[
+        Pattern(
+            name="org_context",
+            regex=r"(?i)\b(?:works?\s+at|works?\s+for|employed\s+at|employed\s+by|company\s+is|organization\s+is)\s+([A-Za-z][A-Za-z0-9\s&.]{2,40})(?=\.|,|$|\s+as|\s+in)",
+            score=0.85
+        ),
+        Pattern(
+            name="org_suffix",
+            regex=r"\b([A-Z][A-Za-z0-9\s&.]{2,40})\s+(?:Inc\.?|LLC|Ltd\.?|Corporation|Corp\.?|Company|Co\.?|Technologies|Tech|Systems|Solutions|Services|Group|International|Pvt\.?\s+Ltd\.?|Limited)\b",
+            score=0.90
+        ),
+    ],
+)
+
+# Custom recognizer for US addresses (street number + street + city + state + zip) - CASE-INSENSITIVE
 address_recognizer = PatternRecognizer(
     supported_entity="LOCATION",
     name="address_recognizer",
@@ -37,19 +73,19 @@ address_recognizer = PatternRecognizer(
         # Full address with zip: 123 Main St, New York, NY 10001
         Pattern(
             name="full_address_zip",
-            regex=r"\b\d+\s+[A-Za-z\s]+(?:Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Lane|Ln|Boulevard|Blvd|Way|Court|Ct|Place|Pl)[\s,]+[A-Za-z\s]+[\s,]+[A-Z]{2}[\s,]+\d{5}(?:-\d{4})?\b",
+            regex=r"(?i)\b\d+\s+[A-Za-z\s]+(?:street|st|avenue|ave|road|rd|drive|dr|lane|ln|boulevard|blvd|way|court|ct|place|pl)[\s,]+[A-Za-z\s]+[\s,]+[A-Z]{2}[\s,]+\d{5}(?:-\d{4})?\b",
             score=0.95
         ),
         # Address without state: 123 Main St, New York 10001
         Pattern(
             name="address_city_zip",
-            regex=r"\b\d+\s+[A-Za-z\s]+(?:Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Lane|Ln|Boulevard|Blvd|Way|Court|Ct|Place|Pl)[\s,]+[A-Za-z\s]+[\s,]+\d{5}(?:-\d{4})?\b",
+            regex=r"(?i)\b\d+\s+[A-Za-z\s]+(?:street|st|avenue|ave|road|rd|drive|dr|lane|ln|boulevard|blvd|way|court|ct|place|pl)[\s,]+[A-Za-z\s]+[\s,]+\d{5}(?:-\d{4})?\b",
             score=0.9
         ),
         # Simple street address with number: 123 Main Street
         Pattern(
             name="street_address",
-            regex=r"\b\d+\s+[A-Za-z\s]+(?:Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Lane|Ln|Boulevard|Blvd|Way|Court|Ct|Place|Pl)\b",
+            regex=r"(?i)\b\d+\s+[A-Za-z\s]+(?:street|st|avenue|ave|road|rd|drive|dr|lane|ln|boulevard|blvd|way|court|ct|place|pl)\b",
             score=0.75
         ),
     ],
@@ -65,39 +101,39 @@ aadhaar_recognizer = PatternRecognizer(
     ],
 )
 
-# Custom recognizer for Indian PAN Card (Format: ABCDE1234F)
+# Custom recognizer for Indian PAN Card (Format: ABCDE1234F) - CASE-INSENSITIVE
 pan_recognizer = PatternRecognizer(
     supported_entity="IN_PAN",
     name="pan_recognizer",
     patterns=[
-        Pattern(name="pan_card", regex=r"\b[A-Z]{5}\d{4}[A-Z]\b", score=0.95),  # ABCDE1234F
+        Pattern(name="pan_card", regex=r"(?i)\b[A-Z]{5}\d{4}[A-Z]\b", score=0.95),  # ABCDE1234F or abcde1234f
     ],
 )
 
-# Custom recognizer for Indian Vehicle Registration (Format: DL01AB1234, MH02CD5678)
+# Custom recognizer for Indian Vehicle Registration (Format: DL01AB1234, MH02CD5678) - CASE-INSENSITIVE
 vehicle_reg_recognizer = PatternRecognizer(
     supported_entity="IN_VEHICLE_REGISTRATION",
     name="vehicle_registration_recognizer",
     patterns=[
-        Pattern(name="vehicle_reg", regex=r"\b[A-Z]{2}[-\s]?\d{2}[-\s]?[A-Z]{1,2}[-\s]?\d{4}\b", score=0.85),
+        Pattern(name="vehicle_reg", regex=r"(?i)\b[A-Z]{2}[-\s]?\d{2}[-\s]?[A-Z]{1,2}[-\s]?\d{4}\b", score=0.85),
     ],
 )
 
-# Custom recognizer for Indian Passport (Format: A1234567, Z9876543)
+# Custom recognizer for Indian Passport (Format: A1234567, Z9876543) - CASE-INSENSITIVE
 passport_recognizer = PatternRecognizer(
     supported_entity="IN_PASSPORT",
     name="passport_recognizer",
     patterns=[
-        Pattern(name="indian_passport", regex=r"\b[A-Z]\d{7}\b", score=0.9),
+        Pattern(name="indian_passport", regex=r"(?i)\b[A-Z]\d{7}\b", score=0.9),
     ],
 )
 
-# Custom recognizer for Indian Voter ID (Format: ABC1234567)
+# Custom recognizer for Indian Voter ID (Format: ABC1234567) - CASE-INSENSITIVE
 voter_id_recognizer = PatternRecognizer(
     supported_entity="IN_VOTER_ID",
     name="voter_id_recognizer",
     patterns=[
-        Pattern(name="voter_id", regex=r"\b[A-Z]{3}\d{7}\b", score=0.85),
+        Pattern(name="voter_id", regex=r"(?i)\b[A-Z]{3}\d{7}\b", score=0.85),
     ],
 )
 
@@ -110,6 +146,8 @@ analyzer.registry.add_recognizer(pan_recognizer)
 analyzer.registry.add_recognizer(vehicle_reg_recognizer)
 analyzer.registry.add_recognizer(passport_recognizer)
 analyzer.registry.add_recognizer(voter_id_recognizer)
+analyzer.registry.add_recognizer(occupation_recognizer)
+analyzer.registry.add_recognizer(organization_recognizer)
 anonymizer = AnonymizerEngine()
 
 # Entity weights for privacy score calculation
@@ -140,6 +178,9 @@ ENTITY_WEIGHTS = {
     "IN_PASSPORT": 25,
     "IN_VOTER_ID": 20,
     "IN_VEHICLE_REGISTRATION": 15,
+    # Professional Information
+    "OCCUPATION": 12,
+    "ORGANIZATION": 14,
 }
 
 
@@ -167,6 +208,8 @@ def resolve_entity_conflicts(entities: List[Dict]) -> List[Dict]:
         "IN_PASSPORT": 75,
         "CREDIT_CARD": 70,
         "US_SSN": 70,
+        "OCCUPATION": 20,
+        "ORGANIZATION": 20,
         "LOCATION": 10,  # Lowest priority
     }
     
@@ -289,14 +332,14 @@ def detect_contextual_names(text: str, existing_entities: List[Dict]) -> List[Di
     # Will capture 1-2 words after context phrases regardless of capitalization
     # Handles various punctuation and spacing issues
     name_patterns = [
-        (r"(?i)(?:my name is|my name's)\s+(\w+(?:\s+\w+)?)", 0.95),
-        (r"(?i)(?:I am|I'm)\s+(\w+(?:\s+\w+)?)", 0.85),
-        (r"(?i)(?:call me|called)\s+(\w+(?:\s+\w+)?)", 0.9),
-        (r"(?i)(?:this is|meet)\s+(\w+(?:\s+\w+)?)", 0.85),
-        (r"(?i)(?:named)\s+(\w+(?:\s+\w+)?)", 0.85),
-        (r"(?i)(?:hi|hello|hey),?\s+(?:i'm|i am|this is)\s+(\w+(?:\s+\w+)?)", 0.9),
+        (r"(?i)(?:my name is|my name's)\s+([a-z][a-z\s]+?)(?=\s+and|\s+from|\s+works?|\.|,|$)", 0.95),
+        (r"(?i)(?:I am|I'm)\s+([a-z][a-z\s]+?)(?=\s+and|\s+from|\s+a\s+|\.|,|$)", 0.85),
+        (r"(?i)(?:call me|called)\s+([a-z][a-z\s]+?)(?=\s+and|\s+from|\.|,|$)", 0.9),
+        (r"(?i)(?:this is|meet)\s+([a-z][a-z\s]+?)(?=\s+from|\s+who|\.|,|$)", 0.85),
+        (r"(?i)(?:named)\s+([a-z][a-z\s]+?)(?=\s+from|\.|,|$)", 0.85),
+        (r"(?i)(?:hi|hello|hey),?\s+(?:i'm|i am|this is)\s+([a-z][a-z\s]+?)(?=\s+and|\s+from|\.|,|$)", 0.9),
         # Handle "from" location patterns
-        (r"(?i)\b(\w+)\s+from\s+(\w+)", 0.90),  # "Tejas from Hyderabad"
+        (r"(?i)\b([a-z][a-z\s]+?)\s+from\s+([a-z]+)", 0.90),  # "tejas from hyderabad"
     ]
     
     for pattern, score in name_patterns:
@@ -308,11 +351,12 @@ def detect_contextual_names(text: str, existing_entities: List[Dict]) -> List[Di
             # Validate the name doesn't contain common words that aren't names
             stop_words = ['and', 'the', 'is', 'at', 'to', 'for', 'of', 'in', 'on', 'my', 'email', 'with', 
                          'here', 'there', 'what', 'how', 'when', 'where', 'why', 'who', 'can', 'will',
-                         'would', 'could', 'should', 'may', 'might', 'must', 'shall', 'be', 'am', 'are']
-            name_lower = name.lower()
+                         'would', 'could', 'should', 'may', 'might', 'must', 'shall', 'be', 'am', 'are',
+                         'works', 'work', 'working']
+            name_lower = name.lower().strip()
             
-            # Skip if name is a stop word or contains email-related text
-            if name_lower in stop_words or 'email' in name_lower or len(name) <= 1:
+            # Skip if name is a stop word, too short, or contains email-related text
+            if name_lower in stop_words or 'email' in name_lower or len(name_lower) <= 1:
                 continue
             
             # Check if this position overlaps with existing PERSON entity
@@ -411,6 +455,9 @@ def analyze_text(text: str, language: str = "en") -> Dict:
             "IN_PASSPORT": OperatorConfig("replace", {"new_value": "[PASSPORT]"}),
             "IN_VOTER_ID": OperatorConfig("replace", {"new_value": "[VOTER_ID]"}),
             "IN_VEHICLE_REGISTRATION": OperatorConfig("replace", {"new_value": "[VEHICLE_REG]"}),
+            # Professional Information
+            "OCCUPATION": OperatorConfig("replace", {"new_value": "[OCCUPATION]"}),
+            "ORGANIZATION": OperatorConfig("replace", {"new_value": "[ORGANIZATION]"}),
         }
     )
     
