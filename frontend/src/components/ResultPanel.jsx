@@ -74,7 +74,8 @@ function ResultPanel({ initialPrompt }) {
 
   const handleSendMessage = async (messageToSend = null) => {
     const message = messageToSend || userMessage
-    if (!message.trim() || !apiKey || chatLoading) return
+    // Ensure message is a string
+    if (typeof message !== 'string' || !message.trim() || !apiKey || chatLoading) return
 
     // First, redact PII from the user's message before sending
     let cleanedMessage = message
@@ -775,7 +776,7 @@ function ResultPanel({ initialPrompt }) {
             />
             <Button
               variant="contained"
-              onClick={handleSendMessage}
+              onClick={() => handleSendMessage()}
               disabled={!apiKey || !userMessage.trim() || chatLoading}
               sx={{
                 px: 3,
