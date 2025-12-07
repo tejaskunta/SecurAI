@@ -218,7 +218,6 @@ MIT License - see [LICENSE](LICENSE) file
 ## 👥 Authors
 
 **Team CodeRed**  
-Built for GitHub Copilot & VS Code Agents Hackathon
 
 ---
 
